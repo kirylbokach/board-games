@@ -1,7 +1,7 @@
 ﻿namespace CyrisOpen.TicTacToe.Logic.Abstractions
 {
     /// <summary>
-    /// Generic abstraction for the game board
+    /// Generic abstraction for a game board
     /// </summary>
     public interface IBoard<TGameState>
     {

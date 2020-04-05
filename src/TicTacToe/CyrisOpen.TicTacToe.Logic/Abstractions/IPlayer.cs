@@ -3,7 +3,7 @@
     /// <summary>
     /// Generic abstraction for a board game player
     /// </summary>
-    interface IPlayer<TGameState>
+    public interface IPlayer<TGameState>
     {
         /// <summary>
         /// Makes a move for given state of the board
