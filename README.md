@@ -1,2 +1,2 @@
-# tic-tac-toe
-OO implementation of the classic game
+# Board Games
+OO implementations of the classic games
