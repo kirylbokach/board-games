@@ -1,13 +1,27 @@
 ﻿namespace CyrisOpen.BoardGames.Abstractions
 {
+    /// <summary>
+    /// Abstraction for a sequence of players in a game with functionality to advance the current player.
+    /// </summary>
     public interface IPlayerSequence
     {
-        IPlayer Next { get; }
-    }
+        /// <summary>
+        /// Gets the currently active player in the game.
+        /// </summary>
+        IPlayer Current { get; }
 
-    public interface ICreatablePlayerSequence : IPlayerSequence
-    {
-        static abstract IPlayerSequence Create(IEnumerable<IPlayer> players, PlayerSequenceRandomizationOptions randomizationOptions = 0,
+        /// <summary>
+        /// Advances the current player to the next player.
+        /// </summary>
+        /// <returns>Currently active  player</returns>
+        IPlayer Advance();
+
+        /// <summary>
+        /// The collection of all players in the sequence.
+        /// </summary>
+        IReadOnlyCollection<IPlayer> Players { get; }
+
+        void Initialize(IEnumerable<IPlayer> players, PlayerSequenceRandomizationOptions randomizationOptions = 0,
             int minPlayers = 2, int maxPlayers = int.MaxValue);
     }
 
