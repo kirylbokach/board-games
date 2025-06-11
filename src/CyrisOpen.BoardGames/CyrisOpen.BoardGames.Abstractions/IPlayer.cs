@@ -7,5 +7,13 @@ public interface IPlayer
 {
     string Name { get; set; }
 
-    void PlayTurn(IBoard board);
+    TMove PlayTurn<TBoardSetup, TMove>(IBoard<TBoardSetup, TMove> board);
+
+    TMove ReplayMove<TBoardSetup, TMove>(IBoard<TBoardSetup, TMove> board, TMove incorrectMove, MoveOutcome incorrectMoveOutcome);
+
+    void AnalyzeMoveOutcome<TBoardSetup, TMove>(IPlayer player, IBoard<TBoardSetup, TMove> board, TMove move, MoveOutcome outcome);
+
+    void AnalyzeGameOutcome<TBoardSetup, TMove>(IBoard<TBoardSetup, TMove> board);
+
+    IReadOnlyCollection<PlayerGameStats> Stats { get; }
 }
