@@ -21,8 +21,8 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Restore dependencies
-      run: dotnet restore ../../src/CyrisOpen.BoardGames/CyrisOpen.BoardGames.sln
+      run: dotnet restore src/CyrisOpen.BoardGames/CyrisOpen.BoardGames.sln
     - name: Build
-      run: dotnet build ../../src/CyrisOpen.BoardGames/CyrisOpen.BoardGames.sln --no-restore
+      run: dotnet build src/CyrisOpen.BoardGames/CyrisOpen.BoardGames.sln --no-restore
     - name: Test
-      run: dotnet test ../../src/CyrisOpen.BoardGames/CyrisOpen.BoardGames.sln --no-build --verbosity normal
+      run: dotnet test src/CyrisOpen.BoardGames/CyrisOpen.BoardGames.sln --no-build --verbosity normal
