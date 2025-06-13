@@ -4,11 +4,13 @@
     {
         private readonly IPlayerSequence _playerSequence;
         private readonly TBoard _board;
+        private readonly IBoardRenderer<TBoard>? _boardRenderer;
 
-        protected BoardGame(IPlayerSequence playerSequence, TBoard board)
+        protected BoardGame(IPlayerSequence playerSequence, TBoard board, IBoardRenderer<TBoard>? boardRenderer = null)
         {
             _playerSequence = playerSequence ?? throw new ArgumentNullException(nameof(playerSequence));
             _board = board ?? throw new ArgumentNullException(nameof(board));
+            _boardRenderer = boardRenderer;
         }
 
         public BoardGameOutcome Play(IEnumerable<IPlayer> players, TBoardSetup boardSetup, PlayerSequenceRandomizationOptions randomizationOptions)
@@ -18,9 +20,13 @@
 
             BoardGameOutcome gameOutcome;
 
+            _boardRenderer?.Render(_board);
+
             do
             {
                 var moveOutcome = MakePlayerMove(_playerSequence.Current, _board, _playerSequence.Players);
+
+                _boardRenderer?.Render(_board);
 
                 if (moveOutcome.IsGameOver) 
                 {
