@@ -14,10 +14,11 @@
 
         public TBoard Board => _board;
 
-        protected BoardGame(IPlayerSequence playerSequence, TBoard board)
+        protected BoardGame(IPlayerSequence playerSequence, TBoard board, IEnumerable<IBoardGameObserver<TBoard, TBoardSetup, TMove>>? observers = null)
         {
             _playerSequence = playerSequence ?? throw new ArgumentNullException(nameof(playerSequence));
             _board = board ?? throw new ArgumentNullException(nameof(board));
+            if (observers != null) _boardGameObservers.AddRange(observers ?? throw new ArgumentNullException(nameof(observers)));
         }
 
         public BoardGameOutcome Play(IEnumerable<IPlayer> players, TBoardSetup boardSetup, PlayerSequenceRandomizationOptions randomizationOptions)
