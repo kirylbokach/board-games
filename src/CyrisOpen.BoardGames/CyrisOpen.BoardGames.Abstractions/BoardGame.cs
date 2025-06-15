@@ -1,16 +1,23 @@
 ﻿namespace CyrisOpen.BoardGames.Abstractions
 {
-    public abstract class BoardGame<TBoard, TBoardSetup, TMove> where TBoard : IBoard<TBoardSetup, TMove> where TBoardSetup : IBoardSetup
+    public abstract class BoardGame<TBoard, TBoardSetup, TMove> : IBoardGame<TBoard, TBoardSetup, TMove> 
+        where TBoard : IBoard<TBoardSetup, TMove> 
+        where TBoardSetup : IBoardSetup
     {
         private readonly IPlayerSequence _playerSequence;
         private readonly TBoard _board;
-        private readonly IBoardRenderer<TBoard>? _boardRenderer;
+        private readonly List<IBoardGameObserver<TBoard, TBoardSetup, TMove>> _boardGameObservers = [];
 
-        protected BoardGame(IPlayerSequence playerSequence, TBoard board, IBoardRenderer<TBoard>? boardRenderer = null)
+        public abstract string Name { get; }
+        
+        public IEnumerable<IPlayer> Players => _playerSequence.Players;
+
+        public TBoard Board => _board;
+
+        protected BoardGame(IPlayerSequence playerSequence, TBoard board)
         {
             _playerSequence = playerSequence ?? throw new ArgumentNullException(nameof(playerSequence));
             _board = board ?? throw new ArgumentNullException(nameof(board));
-            _boardRenderer = boardRenderer;
         }
 
         public BoardGameOutcome Play(IEnumerable<IPlayer> players, TBoardSetup boardSetup, PlayerSequenceRandomizationOptions randomizationOptions)
@@ -20,13 +27,14 @@
 
             BoardGameOutcome gameOutcome;
 
-            _boardRenderer?.Render(_board);
+            _boardGameObservers.ForEach(observer => observer.OnGameStarted(this));
+            _boardGameObservers.ForEach(observer => observer.OnBoardStateChanged(_board));
 
             do
             {
-                var moveOutcome = MakePlayerMove(_playerSequence.Current, _board, _playerSequence.Players);
+                var moveOutcome = MakePlayerMove(_playerSequence.Current);
 
-                _boardRenderer?.Render(_board);
+                _boardGameObservers.ForEach(observer => observer.OnBoardStateChanged(_board));
 
                 if (moveOutcome.IsGameOver) 
                 {
@@ -42,25 +50,46 @@
                 player.AnalyzeGameOutcome(_board);
             }
 
+            _boardGameObservers.ForEach(observer => observer.OnGameEnded(this, gameOutcome));
+
             return gameOutcome;
         }
 
-        private static MoveOutcome MakePlayerMove(IPlayer player, TBoard board, IEnumerable<IPlayer> players)
+        private MoveOutcome MakePlayerMove(IPlayer player)
         {
-            var move = player.PlayTurn(board);
+            _boardGameObservers.ForEach(observer => observer.OnPlayerTurnStarted(player));
 
-            var outcome = board.AcceptMove(player, move);
+            var move = player.PlayTurn(_board);
+
+            var outcome = _board.AcceptMove(player, move);
+
+            _boardGameObservers.ForEach(observer => observer.OnPlayerMoveMade(player, outcome));
 
             while (outcome.Status == MoveStatus.Rejected)
             {
-                move = player.ReplayMove(board, move, outcome);
-                outcome = board.AcceptMove(player, move);
+                move = player.ReplayMove(_board, move, outcome);
+                outcome = _board.AcceptMove(player, move);
+                _boardGameObservers.ForEach(observer => observer.OnPlayerMoveMade(player, outcome));
             }
 
-            foreach (var p in players)
-                p.AnalyzeMoveOutcome(player, board, move, outcome);
+            foreach (var p in Players)
+                p.AnalyzeMoveOutcome(player, _board, move, outcome);
 
             return outcome;
+        }
+
+        public void AddObserver(IBoardGameObserver<TBoard, TBoardSetup, TMove> observer)
+        {
+            ArgumentNullException.ThrowIfNull(observer, nameof(observer));
+
+            _boardGameObservers.Add(observer);
+        }
+
+        public void RemoveObserver(IBoardGameObserver<TBoard, TBoardSetup, TMove> observer)
+        {
+            ArgumentNullException.ThrowIfNull(observer, nameof(observer));
+
+            _boardGameObservers.Remove(observer);
         }
     }
 }

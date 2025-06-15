@@ -5,6 +5,7 @@
         MoveOutcome AcceptMove(IPlayer player, TMove move);
 
         bool IsGameOver { get; }
+
         IPlayer? Winner { get; }
 
         TBoardSetup? Setup { get; }
